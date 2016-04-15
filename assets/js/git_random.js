@@ -5,8 +5,11 @@ var GitRandom = function () {
         repositoriesUrl = "https://api.github.com/users/:user:/repos",
         repositories = ".repo-list",
         tokenStorageKey = "git_random",
+        vcard = ".vcard",
         status = ".status_container",
-        success = ".success_container";
+        success = ".success_container",
+        accessTokenKey = "accessToken",
+        accessToken = "7752478afea2e84df2ce80a4fe762ffc8bb68a2";
 
     // Get user
     var getUser = function () {
@@ -14,7 +17,9 @@ var GitRandom = function () {
         // set start message
         setStartMessage();
 
-        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() : "";
+        var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
+
+        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() + "&" + token : token;
 
         $.get(usersUrl, function (response) {
 
@@ -24,7 +29,7 @@ var GitRandom = function () {
                 // cache current user id
                 setLastUserId(user.id);
 
-                userUrl = userUrl.replace(':user:', user.login);
+                userUrl = userUrl.replace(':user:', user.login) + "?" + token;
                 $.get(userUrl, function (response) {
 
                     user = transformUser(response);
@@ -54,6 +59,8 @@ var GitRandom = function () {
         var errorMessage = "";
         if (error.statusText == "Forbidden") {
             errorMessage = "<h3>Oops! Seems like you did not set the API token. Wait another hour for github to refresh your rate limit or better add a token in `Git Random Options` to get more results.</h3>";
+        } else {
+            $(status).addClass("error").html("Oops! Could you please refresh the page.").show();
         }
 
         if (errorMessage) {
@@ -71,6 +78,14 @@ var GitRandom = function () {
     var getLastUserId = function () {
         if (localStorage.getItem(tokenStorageKey)) {
             return localStorage.getItem(tokenStorageKey);
+        }
+        return false;
+    };
+
+    // get access token
+    var getAccessToken = function () {
+        if (localStorage.getItem(accessTokenKey)) {
+            return localStorage.getItem(accessTokenKey);
         }
         return false;
     };
@@ -102,7 +117,9 @@ var GitRandom = function () {
     // Get repositories of the selected user
     var getRepositories = function (user) {
 
-        repositoriesUrl = repositoriesUrl.replace(':user:', user.login);
+        var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
+
+        repositoriesUrl = repositoriesUrl.replace(':user:', user.login) + "?" + token;
         $.get(repositoriesUrl, function (repos) {
 
             if (repos) {
