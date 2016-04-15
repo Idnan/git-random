@@ -4,17 +4,20 @@ var GitRandom = function () {
         userUrl = "https://api.github.com/users/:user:",
         repositoriesUrl = "https://api.github.com/users/:user:/repos",
         repositories = ".repo-list",
-        vcard = ".vcard";
+        tokenStorageKey = "git_random";
 
     // Get user
     var getUser = function () {
 
-        // @todo get since from user cache
-        // ?since=26
+        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() : "";
+
         $.get(usersUrl, function (response) {
 
             if (response) {
                 var user = response[0];
+
+                // cache current user id
+                setLastUserId(user.id);
 
                 userUrl = userUrl.replace(':user:', user.login);
                 $.get(userUrl, function (response) {
@@ -31,6 +34,19 @@ var GitRandom = function () {
         });
     };
 
+    // Get last displayed user id
+    var getLastUserId = function () {
+        if (localStorage.getItem(tokenStorageKey)) {
+            return localStorage.getItem(tokenStorageKey);
+        }
+        return false;
+    };
+
+    // Set last displayed user id
+    var setLastUserId = function (id) {
+        localStorage.setItem(tokenStorageKey, id);
+    };
+
     // Transform user object
     var transformUser = function (user) {
 
@@ -44,7 +60,7 @@ var GitRandom = function () {
 
         if (user.created_at) {
             var date = new Date(user.created_at);
-            user.created_at = months[date.getMonth() - 1] + " " + date.getDate() + ", " + date.getFullYear();
+            user.created_at = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
         }
 
         return user;
