@@ -4,10 +4,15 @@ var GitRandom = function () {
         userUrl = "https://api.github.com/users/:user:",
         repositoriesUrl = "https://api.github.com/users/:user:/repos",
         repositories = ".repo-list",
-        tokenStorageKey = "git_random";
+        tokenStorageKey = "git_random",
+        status = ".status_container",
+        success = ".success_container";
 
     // Get user
     var getUser = function () {
+
+        // set start message
+        setStartMessage();
 
         usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() : "";
 
@@ -27,11 +32,39 @@ var GitRandom = function () {
                     var source = $("#vcard").html();
                     var template = Handlebars.compile(source);
                     $(vcard).append(template(user));
+                }).fail(function (error) {
+                    handleError(error);
                 });
 
                 getRepositories(user);
             }
+        }).fail(function (error) {
+            handleError(error);
         });
+    };
+
+    // set start message
+    var setStartMessage = function () {
+        $(status).html("<h3>Crunching..... Please wait!</h3>").show();
+    };
+
+    // handle all errors
+    var handleError = function (error) {
+
+        var errorMessage = "";
+        if (error.statusText == "Forbidden") {
+            errorMessage = "<h3>Oops! Seems like you did not set the API token. Wait another hour for github to refresh your rate limit or better add a token in `Git Random Options` to get more results.</h3>";
+        }
+
+        if (errorMessage) {
+            $(status).addClass("error").html(errorMessage).show();
+        }
+    };
+
+    // display results
+    var displayResults = function () {
+        $(status).hide();
+        $(success).show();
     };
 
     // Get last displayed user id
@@ -75,6 +108,12 @@ var GitRandom = function () {
             if (repos) {
                 prepareHtml(repos);
             }
+
+            // display results
+            displayResults();
+
+        }).fail(function (error) {
+            handleError(error);
         });
     };
 
