@@ -10,21 +10,33 @@ var GitRandom = function () {
         // ?since=26
         $.get(usersUrl, function (response) {
 
+            if (response) {
+                var user = response[0];
+                getRepositories(user);
+            }
         });
     };
 
     // Get repositories of the selected user
-    var getRepositories = function () {
+    var getRepositories = function (user) {
 
+        repositoriesUrl = repositoriesUrl.replace(':user:', user.login);
+        $.get(repositoriesUrl, function (response) {
+
+            if (response) {
+                prepareHtml(response);
+            }
+        });
     };
 
-    var get = function () {
-        getUser();
+    // prepare html
+    var prepareHtml = function (response) {
+
     };
 
     return {
         init: function () {
-            get();
+            getUser();
         }
     };
 };
