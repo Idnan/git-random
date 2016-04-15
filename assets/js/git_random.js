@@ -1,7 +1,10 @@
 var GitRandom = function () {
 
     var usersUrl = "https://api.github.com/users",
-        repositoriesUrl = "https://api.github.com/users/:user:/repos";
+        userUrl = "https://api.github.com/users/:user:",
+        repositoriesUrl = "https://api.github.com/users/:user:/repos",
+        repositories = ".repo-list",
+        vcard = ".vcard";
 
     // Get user
     var getUser = function () {
@@ -12,26 +15,62 @@ var GitRandom = function () {
 
             if (response) {
                 var user = response[0];
+
+                userUrl = userUrl.replace(':user:', user.login);
+                $.get(userUrl, function (response) {
+
+                    user = transformUser(response);
+
+                    var source = $("#vcard").html();
+                    var template = Handlebars.compile(source);
+                    $(vcard).append(template(user));
+                });
+
                 getRepositories(user);
             }
         });
+    };
+
+    // Transform user object
+    var transformUser = function (user) {
+
+        user.company_display = user.company ? true : false;
+        user.location_display = user.location ? true : false;
+        user.email_display = user.email ? true : false;
+        user.blog_display = user.blog ? true : false;
+        user.created_at_display = user.created_at ? true : false;
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        if (user.created_at) {
+            var date = new Date(user.created_at);
+            user.created_at = months[date.getMonth() - 1] + " " + date.getDate() + ", " + date.getFullYear();
+        }
+
+        return user;
     };
 
     // Get repositories of the selected user
     var getRepositories = function (user) {
 
         repositoriesUrl = repositoriesUrl.replace(':user:', user.login);
-        $.get(repositoriesUrl, function (response) {
+        $.get(repositoriesUrl, function (repos) {
 
-            if (response) {
-                prepareHtml(response);
+            if (repos) {
+                prepareHtml(repos);
             }
         });
     };
 
     // prepare html
-    var prepareHtml = function (response) {
+    var prepareHtml = function (repos) {
+        var source = $("#repository_list").html();
+        var template = Handlebars.compile(source);
 
+        var data = {
+            repositories: repos
+        };
+        $(repositories).append(template(data));
     };
 
     return {
