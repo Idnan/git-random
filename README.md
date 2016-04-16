@@ -12,7 +12,7 @@ Whenever you will open a new tab, you will be presented with a page similar to f
 
 Extension itself doesn't need any setup. All you have to do is
 
-- Install it from [Chrome Webstore](http://google.com)  or [manually install it](http://superuser.com/a/247654/6877).
+- Install it from [Chrome Webstore](https://goo.gl/EjSMh9)  or [manually install it](http://superuser.com/a/247654/6877).
 
 
 Github API has rate limit applied in their API and although the extension implements the caching in order to make sure that the rate limit may not be crossed but however I would recommend you to set the API token in the extension in order to increase the quota. 
