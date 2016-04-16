@@ -321,7 +321,7 @@ li.public.source {
     border: 0px !important;
 }
 
-.status_container > h3 {
+.status_container > h3, .quote-item {
     display: block;
     padding: 9px 10px 10px;
     margin: 0;
@@ -331,4 +331,33 @@ li.public.source {
     border: 1px solid #d8d8d8;
     border-radius: 3px;
     font-weight: bold;
+}
+
+.muted {
+    color: #BFB7B7;
+}
+
+.options-content h3 {
+    margin: 30px 5px 10px;
+    font-size: 15px;
+}
+
+.btn {
+    width: 300px;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 8px 12px;
+    border: 1px solid #333;
+    margin: 0 5px;
+    background: #fff;
+    box-shadow: 2px 2px #B5ACAC;
+    outline: 0;
+}
+
+.btn:hover {
+    text-decoration: none !important;
+}
+
+.underline {
+    text-decoration: underline;
 }

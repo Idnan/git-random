@@ -1,3 +1,7 @@
+/**
+ * @returns {{init: init}}
+ * @constructor
+ */
 var GitRandom = function () {
 
     var usersUrl = "https://api.github.com/users",
@@ -8,10 +12,11 @@ var GitRandom = function () {
         vcard = ".vcard",
         status = ".status_container",
         success = ".success_container",
-        accessTokenKey = "accessToken",
-        accessToken = "7752478afea2e84df2ce80a4fe762ffc8bb68a27";
+        accessTokenKey = "accessToken";
 
-    // Get user
+    /**
+     * Get user
+     */
     var getUser = function () {
 
         // set start message
@@ -48,19 +53,26 @@ var GitRandom = function () {
         });
     };
 
-    // set start message
+    /**
+     * Set start message
+     */
     var setStartMessage = function () {
         $(status).html("<h3>Crunching..... Please wait!</h3>").show();
     };
 
-    // handle all errors
+    /**
+     * Handle all errors
+     * @param error
+     */
     var handleError = function (error) {
 
         var errorMessage = "";
-        if (error.statusText == "Forbidden") {
+        if (error && error.statusText.toLowerCase() == "forbidden") {
             errorMessage = "<h3>Oops! Seems like you did not set the API token. Wait another hour for github to refresh your rate limit or better add a token in `Git Random Options` to get more results.</h3>";
+        } else if (error && error.statusText.toLowerCase() == 'unauthorized') {
+            errorMessage = "<h3>Oops! Seems to be a problem with your API token. Could you verify the API token you entered in extension options.</h3>";
         } else {
-            $(status).addClass("error").html("Oops! Could you please refresh the page.").show();
+            errorMessage = "<h3>Oops! Could you please refresh the page.</h3>";
         }
 
         if (errorMessage) {
@@ -68,13 +80,18 @@ var GitRandom = function () {
         }
     };
 
-    // display results
+    /**
+     * Display results
+     */
     var displayResults = function () {
         $(status).hide();
         $(success).show();
     };
 
-    // Get last displayed user id
+    /**
+     * Get last displayed user id
+     * @returns {boolean}
+     */
     var getLastUserId = function () {
         if (localStorage.getItem(tokenStorageKey)) {
             return localStorage.getItem(tokenStorageKey);
@@ -82,7 +99,10 @@ var GitRandom = function () {
         return false;
     };
 
-    // get access token
+    /**
+     * Get access token
+     * @returns {boolean}
+     */
     var getAccessToken = function () {
         if (localStorage.getItem(accessTokenKey)) {
             return localStorage.getItem(accessTokenKey);
@@ -90,12 +110,19 @@ var GitRandom = function () {
         return false;
     };
 
-    // Set last displayed user id
+    /**
+     * Set last displayed user id
+     * @param id
+     */
     var setLastUserId = function (id) {
         localStorage.setItem(tokenStorageKey, id);
     };
 
-    // Transform user object
+    /**
+     * Transform user object
+     * @param user
+     * @returns {*}
+     */
     var transformUser = function (user) {
 
         user.company_display = user.company ? true : false;
@@ -114,7 +141,10 @@ var GitRandom = function () {
         return user;
     };
 
-    // Get repositories of the selected user
+    /**
+     * Get repositories of the selected user
+     * @param user
+     */
     var getRepositories = function (user) {
 
         var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
@@ -134,7 +164,10 @@ var GitRandom = function () {
         });
     };
 
-    // prepare html
+    /**
+     * Prepare html
+     * @param repos
+     */
     var prepareHtml = function (repos) {
         var source = $("#repository_list").html();
         var template = Handlebars.compile(source);
@@ -152,5 +185,7 @@ var GitRandom = function () {
     };
 };
 
-var random = new GitRandom();
-random.init();
+$(function () {
+    var random = new GitRandom();
+    random.init();
+});
