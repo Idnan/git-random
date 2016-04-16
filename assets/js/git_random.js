@@ -4,15 +4,15 @@
  */
 var GitRandom = function () {
 
-    var usersUrl = "https://api.github.com/users",
-        userUrl = "https://api.github.com/users/:user:",
-        repositoriesUrl = "https://api.github.com/users/:user:/repos",
-        repositories = ".repo-list",
-        tokenStorageKey = "git_random",
-        vcard = ".vcard",
-        status = ".status_container",
-        success = ".success_container",
-        accessTokenKey = "accessToken";
+    var usersUrl = "https://api.github.com/users",      // get all users
+        userUrl = "https://api.github.com/users/:user:",        // get specific user information
+        repositoriesUrl = "https://api.github.com/users/:user:/repos",      // get all user repositories
+        repositories = ".repo-list",        // repository list container
+        tokenStorageKey = "git_random",     // access token storage key
+        vcard = ".vcard",           // vcard class
+        status = ".status_container",       // status container class
+        success = ".success_container",     // success container class
+        accessTokenKey = "accessToken";     // access token storage key
 
     /**
      * Get user
