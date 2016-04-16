@@ -9,7 +9,7 @@ var GitRandom = function () {
         status = ".status_container",
         success = ".success_container",
         accessTokenKey = "accessToken",
-        accessToken = "7752478afea2e84df2ce80a4fe762ffc8bb68a2";
+        accessToken = "7752478afea2e84df2ce80a4fe762ffc8bb68a27";
 
     // Get user
     var getUser = function () {
