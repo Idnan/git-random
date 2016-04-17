@@ -24,7 +24,7 @@ var GitRandom = function () {
 
         var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
 
-        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() + "&" + token : token;
+        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() + "&" + token : "?" + token;
 
         $.get(usersUrl, function (response) {
 
