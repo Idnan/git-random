@@ -3,7 +3,7 @@
   "name": "Git Random",
   "short_name": "GitRandom",
   "description": "Git Random is a simple chrome extension that randomly selects a user from GitHub and tells you all about it.",
-  "version": "1",
+  "version": "1.1.0",
   "permissions": [
     "tabs",
     "storage",
