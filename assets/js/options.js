@@ -1,64 +1,59 @@
 /**
- * Options module to manage the options
- * @returns {{init: init}}
- * @constructor
- */
-function Options() {
-
-    var git_token = ".git_token",
-        quote_item = ".quote-item",
-        access_token_key = "accessToken";
-
-    /**
-     * Performs the UI bindings
-     */
-    var bindUI = function () {
-
-        if (getAccessToken() !== false) {
-            $(git_token).val(getAccessToken());
-        }
-
-        $(document).on('click', '.save-token', function (e) {
-            e.preventDefault();
-
-            if ($(git_token).val().trim()) {
-                saveToken($(git_token).val().trim());
-                $(quote_item).html('Woohoo! Token saved.');
-            }
-        });
-    };
-
-    /**
-     * Save token in user local storage
-     * @param token
-     */
-    var saveToken = function (token) {
-        localStorage.setItem(access_token_key, token);
-    };
-
-    /**
-     * Get access token
-     * @returns {boolean}
-     */
-    var getAccessToken = function () {
-        if (localStorage.getItem(access_token_key)) {
-            return localStorage.getItem(access_token_key);
-        }
-        return false;
-    };
-
-    return {
-
-        /**
-         * Initializes the options page
-         */
-        init: function () {
-            bindUI();
-        }
-    };
+* Options module to manage the options
+*/
+class Options {
+  
+  get gitToken () {
+    return '.git_token'
+  }
+  
+  get quoteItem () {
+    return '.quote-item'
+  }
+  
+  get accessTokenKey () {
+    return 'accessToken'
+  }
+  
+  /**
+  * Save token in user local storage
+  * @param token
+  */
+  saveToken (token) {
+    localStorage.setItem(this.accessTokenKey, token)
+  }
+  
+  /**
+  * Get access token
+  * @returns {?string}
+  */
+  get accessToken () {
+    return localStorage.getItem(this.accessTokenKey)
+  }
+  
+  /**
+  * Initializes the options page
+  * Performs the UI bindings
+  */
+  init () {
+    const git = document.querySelector(this.gitToken)
+    const save = document.querySelector('.save-token')
+    const quote = document.querySelector(this.quoteItem)
+    
+    if (this.accessToken)
+    git.value = this.accessToken
+    
+    save.addEventListener('click', event => {
+      event.preventDefault()
+      if (!git.value.trim()) return
+      
+      this.saveToken(git.value.trim())
+      quote.innerHTML = 'Woohou! Token saved.'
+    })
+  }
 }
 
-$(function () {
-    var options = new Options();
-    options.init();
-});
+(function () {
+  const options = new Options()
+  options.init()
+})()
