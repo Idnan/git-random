@@ -1,191 +1,187 @@
-/**
- * @returns {{init: init}}
- * @constructor
- */
-var GitRandom = function () {
-
-    var usersUrl = "https://api.github.com/users",      // get all users
-        userUrl = "https://api.github.com/users/:user:",        // get specific user information
-        repositoriesUrl = "https://api.github.com/users/:user:/repos",      // get all user repositories
-        repositories = ".repo-list",        // repository list container
-        tokenStorageKey = "git_random",     // access token storage key
-        vcard = ".vcard",           // vcard class
-        status = ".status_container",       // status container class
-        success = ".success_container",     // success container class
-        accessTokenKey = "accessToken";     // access token storage key
-
-    /**
-     * Get user
-     */
-    var getUser = function () {
-
-        // set start message
-        setStartMessage();
-
-        var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
-
-        usersUrl += (getLastUserId() !== false) ? "?since=" + getLastUserId() + "&" + token : "?" + token;
-
-        $.get(usersUrl, function (response) {
-
-            if (response) {
-                var user = response[0];
-
-                // cache current user id
-                setLastUserId(user.id);
-
-                userUrl = userUrl.replace(':user:', user.login) + "?" + token;
-                $.get(userUrl, function (response) {
-
-                    user = transformUser(response);
-
-                    var source = $("#vcard").html();
-                    var template = Handlebars.compile(source);
-                    $(vcard).append(template(user));
-                }).fail(function (error) {
-                    handleError(error);
-                });
-
-                getRepositories(user);
-            }
-        }).fail(function (error) {
-            handleError(error);
-        });
-    };
+class GitRandom {
 
     /**
      * Set start message
      */
-    var setStartMessage = function () {
-        $(status).html("<h3>Crunching..... Please wait!</h3>").show();
-    };
+    init () {
+        const status = document.querySelector(this.status)
+        status.innerHTML = '<h3>Crunching..... Please wait!</h3>'
+        status.style.display = 'block'
+        this.fetchUser()
+    }
+
+    fetchUser () {
+        const token = this.accessToken
+        const usersUrl = this.lastUserId ? `?since=${this.lastUserId}&${token}` : `?${token}`
+        fetch(`${this.usersUrl}${usersUrl}`)
+            .then(response => response.json())
+            .then(json => json[0])
+            .then(user => this.loadUser(user))
+            .then(user => this.fetchRepositories(user))
+            .catch(error => this.handleError(error))
+    }
+
+    /**
+     * Load an user and compile template
+     * @param user
+     */
+    loadUser (user) {
+        localStorage.setItem(this.tokenStorageKey, user.id)
+        const userUrl = `${this.userUrl.replace(':user:', user.login)}?${this.accessToken}`
+        fetch(userUrl)
+            .then(response => response.json())
+            .then(user => this.transformUser(user))
+            .then(user => {
+                const source = document.querySelector('#vcard').innerHTML
+                const template = Handlebars.compile(source)
+                document.querySelector(this.vcard).insertAdjacentHTML('beforeend', template(user))
+            })
+            .catch(error => this.handleError(error))
+        return user
+    }
+
+    /**
+     * Get repositories of the selected user
+     * @param user
+     */
+    fetchRepositories (user) {
+        const repositoriesUrl = `${this.repositoriesUrl.replace(':user:', user.login)}?${this.accessToken}`
+        fetch(repositoriesUrl)
+            .then(response => response.json())
+            .then(repositories => this.loadRepositories(repositories))
+            .catch(error => this.handleError(error))
+        
+        return user
+    }
+
+    loadRepositories (repositories) {
+        if (repositories) this.prepareHtml(repositories)
+        this.displayResults()
+    }
+    
+    /**
+     * Prepare html
+     * @param repos
+     */
+    prepareHtml (repositories) {
+        const source = document.querySelector('#repository_list').innerHTML
+        const template = Handlebars.compile(source)
+        document.querySelector(this.repositories).insertAdjacentHTML('beforeend', template({ repositories }))
+    }
 
     /**
      * Handle all errors
      * @param error
      */
-    var handleError = function (error) {
-
-        var errorMessage = "";
-        if (error && error.statusText.toLowerCase() == "forbidden") {
-            errorMessage = "<h3>Oops! Seems like you did not set the API token. Wait another hour for github to refresh your rate limit or better add a token in `Git Random Options` to get more results.</h3>";
-        } else if (error && error.statusText.toLowerCase() == 'unauthorized') {
-            errorMessage = "<h3>Oops! Seems to be a problem with your API token. Could you verify the API token you entered in extension options.</h3>";
-        } else {
-            errorMessage = "<h3>Oops! Could you please refresh the page.</h3>";
-        }
-
-        if (errorMessage) {
-            $(status).addClass("error").html(errorMessage).show();
-        }
-    };
+    handleError (error) {
+        const status = document.querySelector(this.status)
+        console.error(error)
+        const text = error && error.name.toLowerCase() || ''
+        const message = (text == 'forbidden')
+            ? '<h3>Oops! Seems like you did not set the API token. Wait another hour for github to refresh your rate limit or better add a token in `Git Random Options` to get more results.</h3>'
+            : (text == 'unauthorized')
+            ? '<h3>Oops! Seems to be a problem with your API token. Could you verify the API token you entered in extension options.</h3>'
+            : '<h3>Oops! Could you please refresh the page.</h3>';
+        
+        (status.classList) ? status.classList.add('error') : status.className += ' error'
+        status.innerHTML = message
+        status.style.display = 'block'
+    }
 
     /**
      * Display results
      */
-    var displayResults = function () {
-        $(status).hide();
-        $(success).show();
-    };
-
-    /**
-     * Get last displayed user id
-     * @returns {boolean}
-     */
-    var getLastUserId = function () {
-        if (localStorage.getItem(tokenStorageKey)) {
-            return localStorage.getItem(tokenStorageKey);
-        }
-        return false;
-    };
-
-    /**
-     * Get access token
-     * @returns {boolean}
-     */
-    var getAccessToken = function () {
-        if (localStorage.getItem(accessTokenKey)) {
-            return localStorage.getItem(accessTokenKey);
-        }
-        return false;
-    };
-
-    /**
-     * Set last displayed user id
-     * @param id
-     */
-    var setLastUserId = function (id) {
-        localStorage.setItem(tokenStorageKey, id);
-    };
+    displayResults () {
+        document.querySelector(this.status).style.display = 'none'
+        document.querySelector(this.success).style.display = 'block'
+    }
 
     /**
      * Transform user object
      * @param user
      * @returns {*}
      */
-    var transformUser = function (user) {
-
-        user.company_display = user.company ? true : false;
-        user.location_display = user.location ? true : false;
-        user.email_display = user.email ? true : false;
-        user.blog_display = user.blog ? true : false;
-        user.created_at_display = user.created_at ? true : false;
-
-        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    transformUser (user) {
+        user = {...user,
+            company_display: !!user.company,
+            location_display: !!user.location,
+            email_display: !!user.email,
+            blog_display: !!user.blog,
+            created_at_display: !!user.created_at
+        }
 
         if (user.created_at) {
-            var date = new Date(user.created_at);
-            user.created_at = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+            const date = new Date(user.created_at)
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            user.created_at = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
         }
 
-        return user;
+        return user
     };
 
     /**
-     * Get repositories of the selected user
-     * @param user
+     * Set last displayed user id
+     * @param id
      */
-    var getRepositories = function (user) {
-
-        var token = (getAccessToken() !== false) ? "access_token=" + getAccessToken() : "";
-
-        repositoriesUrl = repositoriesUrl.replace(':user:', user.login) + "?" + token;
-        $.get(repositoriesUrl, function (repos) {
-
-            if (repos) {
-                prepareHtml(repos);
-            }
-
-            // display results
-            displayResults();
-
-        }).fail(function (error) {
-            handleError(error);
-        });
-    };
+    setLastUserId (id) {
+        localStorage.setItem(this.tokenStorageKey, id)
+    }
 
     /**
-     * Prepare html
-     * @param repos
+     * Get last displayed user id
+     * @returns {?string}
      */
-    var prepareHtml = function (repos) {
-        var source = $("#repository_list").html();
-        var template = Handlebars.compile(source);
+    get lastUserId () {
+        return localStorage.getItem(this.tokenStorageKey)
+    }
+    
+    /**
+     * Get access token format for query
+     * @returns {?string}
+     */
+    get accessToken () {
+        const localValue = localStorage.getItem(this.accessTokenKey)
+        return localValue ? `access_token=${localValue}` : ''
+    }
 
-        var data = {
-            repositories: repos
-        };
-        $(repositories).append(template(data));
-    };
+    get usersUrl () {
+        return 'https://api.github.com/users'
+    }
 
-    return {
-        init: function () {
-            getUser();
-        }
-    };
-};
+    get userUrl () {
+        return 'https://api.github.com/users/:user:'
+    }
 
-$(function () {
-    var random = new GitRandom();
-    random.init();
-});
+    get repositoriesUrl () {
+        return 'https://api.github.com/users/:user:/repos'
+    }
+
+    get repositories () {
+        return '.repo-list'
+    }
+
+    get tokenStorageKey () {
+        return "git_random"
+    }
+
+    get vcard () {
+        return '.vcard'
+    }
+
+    get status () {
+        return '.status_container'
+    } 
+
+    get success () {
+        return '.success_container'
+    } 
+
+    get accessTokenKey () {
+        return 'accessToken'
+    } 
+}
+
+(function () {
+    const gitRandom = new GitRandom()
+    gitRandom.init()
+})()
