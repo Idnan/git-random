@@ -7,7 +7,7 @@ class GitRandom {
         const status = document.querySelector(this.status);
         status.innerHTML = '<h3>Crunching..... Please wait!</h3>';
         status.style.display = 'block';
-        this.fetchUser()
+        this.fetchUser();
     }
 
     fetchUser() {
@@ -18,7 +18,7 @@ class GitRandom {
             .then(json => json[0])
             .then(user => this.loadUser(user))
             .then(user => this.fetchRepositories(user))
-            .catch(error => this.handleError(error))
+            .catch(error => this.handleError(error));
     }
 
     /**
@@ -37,7 +37,7 @@ class GitRandom {
                 document.querySelector(this.vcard).insertAdjacentHTML('beforeend', template(user))
             })
             .catch(error => this.handleError(error));
-        return user
+        return user;
     }
 
     /**
@@ -51,12 +51,14 @@ class GitRandom {
             .then(repositories => this.loadRepositories(repositories))
             .catch(error => this.handleError(error));
 
-        return user
+        return user;
     }
 
     loadRepositories(repositories) {
-        if (repositories) this.prepareHtml(repositories);
-        this.displayResults()
+        if (repositories) {
+            this.prepareHtml(repositories);
+        }
+        this.displayResults();
     }
 
     /**
@@ -117,8 +119,8 @@ class GitRandom {
             user.created_at = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
         }
 
-        return user
-    };
+        return user;
+    }
 
     /**
      * Set last displayed user id
