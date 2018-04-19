@@ -29,7 +29,7 @@ Here is how you can do that
 - Voila! You are all set to go.
 
 ## Contribution
-I'd love to hear what you have to say. Reach me out at mahradnan@hotmail.com or on twitter @AdnaanAhmeed
+I'd love to hear what you have to say. Reach me out at idnan.se@gmail.com or on twitter @AdnaanAhmeed
 
 ## License
 MIT © [Adnan Ahmed](https://github.com/idnan)
